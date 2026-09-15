@@ -45,21 +45,9 @@ Restart OpenCADStudio.
 
 ## Use
 
-Click **Number points** in the **xfTools** ribbon tab, or run:
+Click **Number points** in the **xfTools** ribbon tab, or run `PNUM`. On Windows and macOS, a compact settings window lets you set the start number, increment, prefix, text height, upper-right offset, and text style before clicking points. Linux keeps its existing inline configuration.
 
-```text
-PNUM:start,increment,prefix
-```
-
-Examples:
-
-```text
-PNUM
-PNUM:1,1,P-
-PNUM:100,10,PT-
-```
-
-The command accepts vertices and empty drawing locations. It creates a text label at a fixed upper-right offset, then retains the next number until OpenCADStudio closes. Press Enter or Esc to finish.
+The command accepts vertices and empty drawing locations. It creates a text label using the selected settings, then retains the next number until OpenCADStudio closes. Press Enter or Esc to finish.
 
 ## Development
 

@@ -47,29 +47,21 @@ La prima esecuzione parte da `1`, aumenta di `1` e non ha prefisso.
 
 ## Configurare o riavviare la numerazione
 
-Prima di selezionare i punti, digita:
+Ogni avvio di `PNUM` apre una finestra con questi campi:
 
-```text
-PNUM:numero-iniziale,incremento,prefisso
-```
+- numero iniziale;
+- incremento (può essere negativo);
+- prefisso;
+- altezza del testo;
+- offset alto-destra;
+- stile testo.
 
-| Obiettivo | Comando | Risultato |
-| --- | --- | --- |
-| Continuare | `PNUM` | Mantiene il prossimo valore della sessione |
-| Ricominciare da 1 | `PNUM:1` | Riparte da 1 e conserva incremento/prefisso correnti |
-| Prefisso `P-` | `PNUM:1,1,P-` | `P-1`, `P-2`, `P-3`… |
-| Salti di 10 | `PNUM:100,10,PT-` | `PT-100`, `PT-110`, `PT-120`… |
-| Conto alla rovescia | `PNUM:10,-1,N-` | `N-10`, `N-9`, `N-8`… |
-| Rimuovere il prefisso | `PNUM:1,1,` | `1`, `2`, `3`… |
-
-Non inserire spazi dopo `PNUM`: il comando parte immediatamente. Il prefisso non può contenere spazi.
+Modifica i valori e scegli **Start**. Scegli **Cancel** per non avviare la numerazione. I valori dell’ultimo avvio restano proposti fino alla chiusura di OpenCADStudio.
 
 ## Aspetto delle etichette
 
 - Le etichette sono entità `TEXT`, quindi puoi selezionarle, spostarle, modificarle o eliminarle come normale testo CAD.
-- Altezza testo: `2.5` unità di disegno.
-- Offset: `1.25` unità verso alto-destra dal punto cliccato.
-- Stile testo: quello standard del disegno.
+- Altezza, offset e stile derivano dai valori scelti nella finestra.
 
 ## Risoluzione problemi
 
@@ -77,5 +69,5 @@ Non inserire spazi dopo `PNUM`: il comando parte immediatamente. Il prefisso non
 | --- | --- |
 | La scheda **xfTools** non compare | Controlla che DLL e `plugin.toml` siano nella stessa cartella e riavvia OpenCADStudio. |
 | Il plugin non viene caricato | Verifica di usare OpenCADStudio `v2026.37`; il plugin dipende dalla sua API. |
-| Il testo è troppo piccolo/grande | La prima versione usa altezza fissa `2.5`; modifica la singola etichetta o richiedi una versione configurabile. |
-| Il numero non riparte | Avvia `PNUM` con il numero iniziale desiderato, ad esempio `PNUM:1,1,P-`. |
+| Il testo è troppo piccolo/grande | Imposta l’altezza desiderata nella finestra prima di scegliere **Start**. |
+| Il numero non riparte | Imposta il numero iniziale desiderato nella finestra prima di scegliere **Start**. |
