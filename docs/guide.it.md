@@ -22,12 +22,12 @@ Il plugin inserisce etichette di testo numeriche nel disegno. Dopo l’avvio, fa
 5. Copia entrambi i file al suo interno.
 6. Riavvia OpenCADStudio.
 
-Dopo il riavvio compare la scheda **Numbering** nel ribbon, con il pulsante **Number points** e l’icona `1,2…`.
+Dopo il riavvio compare la scheda **xfTools** nel ribbon, con il pulsante **Number points** e l’icona `1,2…`.
 
 ## Numerazione standard
 
 1. Apri un disegno.
-2. Seleziona **Numbering → Number points** oppure digita `PNUM` nella riga di comando.
+2. Seleziona **xfTools → Number points** oppure digita `PNUM` nella riga di comando.
 3. Fai clic sui punti nell’ordine desiderato.
 4. Premi **Invio** o **Esc** per terminare.
 
@@ -63,7 +63,7 @@ Il prefisso non può contenere spazi.
 
 | Problema | Cosa verificare |
 | --- | --- |
-| La scheda **Numbering** non compare | Controlla che DLL e `plugin.toml` siano nella stessa cartella e riavvia OpenCADStudio. |
+| La scheda **xfTools** non compare | Controlla che DLL e `plugin.toml` siano nella stessa cartella e riavvia OpenCADStudio. |
 | Il plugin non viene caricato | Verifica di usare OpenCADStudio `v2026.37`; il plugin dipende dalla sua API. |
 | Il testo è troppo piccolo/grande | La prima versione usa altezza fissa `2.5`; modifica la singola etichetta o richiedi una versione configurabile. |
 | Il numero non riparte | Avvia `PNUM` con il numero iniziale desiderato, ad esempio `PNUM 1 1 P-`. |

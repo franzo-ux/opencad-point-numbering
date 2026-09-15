@@ -22,12 +22,12 @@ The plugin places numeric text labels in a drawing. Once started, click a vertex
 5. Copy both files into it.
 6. Restart OpenCADStudio.
 
-After restarting, the **Numbering** ribbon tab includes a **Number points** button with a `1,2…` icon.
+After restarting, the **xfTools** ribbon tab includes a **Number points** button with a `1,2…` icon.
 
 ## Standard numbering
 
 1. Open a drawing.
-2. Select **Numbering → Number points**, or enter `PNUM` in the command line.
+2. Select **xfTools → Number points**, or enter `PNUM` in the command line.
 3. Click points in the required order.
 4. Press **Enter** or **Esc** to finish.
 
@@ -63,7 +63,7 @@ Prefixes cannot contain spaces.
 
 | Problem | Check |
 | --- | --- |
-| The **Numbering** tab is missing | Ensure the DLL and `plugin.toml` are in the same folder, then restart OpenCADStudio. |
+| The **xfTools** tab is missing | Ensure the DLL and `plugin.toml` are in the same folder, then restart OpenCADStudio. |
 | The plugin does not load | Confirm you are using OpenCADStudio `v2026.37`; the plugin depends on its API. |
 | Labels are too large or small | The first version uses a fixed height of `2.5`; edit individual labels or request a configurable version. |
 | The number does not restart | Start `PNUM` with the desired start value, such as `PNUM 1 1 P-`. |

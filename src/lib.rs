@@ -72,7 +72,7 @@ impl CadModule for PointNumberingModule {
         MANIFEST.id
     }
     fn title(&self) -> &'static str {
-        "Numbering"
+        "xfTools"
     }
 
     fn ribbon_groups(&self) -> &[RibbonGroup] {

@@ -35,7 +35,7 @@ Restart OpenCADStudio.
 
 ## Use
 
-Click **Number points** in the **Numbering** ribbon tab, or run:
+Click **Number points** in the **xfTools** ribbon tab, or run:
 
 ```text
 PNUM [start] [increment] [prefix]
