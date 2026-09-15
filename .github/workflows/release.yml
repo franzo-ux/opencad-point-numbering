@@ -9,7 +9,18 @@ permissions:
 
 jobs:
   release:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            library: opencad_point_numbering.dll
+            asset: opencad.point_numbering-windows-x86_64.dll
+          # OpenCADStudio publishes Apple Silicon desktop builds.
+          - os: macos-14
+            library: libopencad_point_numbering.dylib
+            asset: opencad.point_numbering-macos-aarch64.dylib
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.98.1
@@ -19,11 +30,10 @@ jobs:
         shell: bash
         run: |
           mkdir dist
-          cp target/release/opencad_point_numbering.dll \
-            dist/opencad.point_numbering-windows-x86_64.dll
+          cp "target/release/${{ matrix.library }}" "dist/${{ matrix.asset }}"
           cp plugin.toml dist/plugin.toml
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/opencad.point_numbering-windows-x86_64.dll
+            dist/${{ matrix.asset }}
             dist/plugin.toml

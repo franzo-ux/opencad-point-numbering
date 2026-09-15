@@ -24,6 +24,18 @@ The plugin places numeric text labels in a drawing. Once started, click a vertex
 
 After restarting, the **xfTools** ribbon tab includes a **Number points** button with a `1,2…` icon.
 
+## Install on macOS (Apple Silicon)
+
+1. Open the [latest release](https://github.com/franzo-ux/opencad-point-numbering/releases/latest).
+2. Download `opencad.point_numbering-macos-aarch64.dylib` and `plugin.toml`.
+3. Copy both to:
+
+   ```text
+   ~/Library/Application Support/OpenCADStudio/plugins/opencad.point_numbering/
+   ```
+
+4. Restart OpenCADStudio.
+
 ## Standard numbering
 
 1. Open a drawing.

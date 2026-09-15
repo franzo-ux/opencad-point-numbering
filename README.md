@@ -21,6 +21,16 @@ Download `opencad.point_numbering-windows-x86_64.dll` and `plugin.toml` from the
 
 Restart OpenCADStudio.
 
+### macOS (Apple Silicon)
+
+Download `opencad.point_numbering-macos-aarch64.dylib` and `plugin.toml` from the [latest release](https://github.com/franzo-ux/opencad-point-numbering/releases/latest), then copy both files to:
+
+```text
+~/Library/Application Support/OpenCADStudio/plugins/opencad.point_numbering/
+```
+
+Restart OpenCADStudio.
+
 ### Linux source build
 
 ```sh

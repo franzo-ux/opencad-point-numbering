@@ -24,6 +24,18 @@ Il plugin inserisce etichette di testo numeriche nel disegno. Dopo l’avvio, fa
 
 Dopo il riavvio compare la scheda **xfTools** nel ribbon, con il pulsante **Number points** e l’icona `1,2…`.
 
+## Installazione su macOS (Apple Silicon)
+
+1. Apri la [release più recente](https://github.com/franzo-ux/opencad-point-numbering/releases/latest).
+2. Scarica `opencad.point_numbering-macos-aarch64.dylib` e `plugin.toml`.
+3. Copia entrambi in:
+
+   ```text
+   ~/Library/Application Support/OpenCADStudio/plugins/opencad.point_numbering/
+   ```
+
+4. Riavvia OpenCADStudio.
+
 ## Numerazione standard
 
 1. Apri un disegno.
