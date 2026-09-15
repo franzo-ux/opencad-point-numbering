@@ -4,6 +4,9 @@
 
 An [OpenCADStudio](https://github.com/HakanSeven12/OpenCADStudio) plugin that places incrementing text labels by clicking points in the drawing.
 
+- [Guida rapida in italiano](docs/guide.it.md)
+- [Quick guide in English](docs/guide.en.md)
+
 ## Install
 
 This plugin is built for OpenCADStudio `v2026.37` and Rust `1.98.1`.
