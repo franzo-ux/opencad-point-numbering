@@ -13,7 +13,7 @@ const OFFSET: f64 = 1.25;
 
 static MANIFEST: PluginManifest = PluginManifest {
     id: "opencad.point_numbering",
-    name: "Point Numbering",
+    name: "xfTools",
     version: env!("CARGO_PKG_VERSION"),
     description: "Place incrementing labels by clicking points in the drawing.",
     api_version: ApiVersion::CURRENT,
