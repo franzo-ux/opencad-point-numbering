@@ -50,19 +50,19 @@ The first run starts at `1`, increments by `1`, and has no prefix.
 Before clicking points, enter:
 
 ```text
-PNUM [start-number] [increment] [prefix]
+PNUM:start-number,increment,prefix
 ```
 
 | Goal | Command | Result |
 | --- | --- | --- |
 | Continue | `PNUM` | Keeps the session’s next value |
-| Restart at 1 | `PNUM 1` | Restarts at 1, preserving the current increment and prefix |
-| Add `P-` prefix | `PNUM 1 1 P-` | `P-1`, `P-2`, `P-3`… |
-| Count by tens | `PNUM 100 10 PT-` | `PT-100`, `PT-110`, `PT-120`… |
-| Count down | `PNUM 10 -1 N-` | `N-10`, `N-9`, `N-8`… |
-| Clear prefix | `PNUM 1 1 ""` | `1`, `2`, `3`… |
+| Restart at 1 | `PNUM:1` | Restarts at 1, preserving the current increment and prefix |
+| Add `P-` prefix | `PNUM:1,1,P-` | `P-1`, `P-2`, `P-3`… |
+| Count by tens | `PNUM:100,10,PT-` | `PT-100`, `PT-110`, `PT-120`… |
+| Count down | `PNUM:10,-1,N-` | `N-10`, `N-9`, `N-8`… |
+| Clear prefix | `PNUM:1,1,` | `1`, `2`, `3`… |
 
-Prefixes cannot contain spaces.
+Do not enter a space after `PNUM`: that immediately starts the command. Prefixes cannot contain spaces.
 
 ## Label appearance
 
@@ -78,4 +78,4 @@ Prefixes cannot contain spaces.
 | The **xfTools** tab is missing | Ensure the DLL and `plugin.toml` are in the same folder, then restart OpenCADStudio. |
 | The plugin does not load | Confirm you are using OpenCADStudio `v2026.37`; the plugin depends on its API. |
 | Labels are too large or small | The first version uses a fixed height of `2.5`; edit individual labels or request a configurable version. |
-| The number does not restart | Start `PNUM` with the desired start value, such as `PNUM 1 1 P-`. |
+| The number does not restart | Start `PNUM` with the desired start value, such as `PNUM:1,1,P-`. |

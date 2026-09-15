@@ -48,15 +48,15 @@ Restart OpenCADStudio.
 Click **Number points** in the **xfTools** ribbon tab, or run:
 
 ```text
-PNUM [start] [increment] [prefix]
+PNUM:start,increment,prefix
 ```
 
 Examples:
 
 ```text
 PNUM
-PNUM 1 1 P-
-PNUM 100 10 PT-
+PNUM:1,1,P-
+PNUM:100,10,PT-
 ```
 
 The command accepts vertices and empty drawing locations. It creates a text label at a fixed upper-right offset, then retains the next number until OpenCADStudio closes. Press Enter or Esc to finish.

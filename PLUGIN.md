@@ -11,15 +11,15 @@ The **Number points** ribbon tool uses the theme-aware `1,2…` glyph and starts
 Use the command line before placement:
 
 ```text
-PNUM [start] [increment] [prefix]
+PNUM:start,increment,prefix
 ```
 
 Examples:
 
 ```text
 PNUM
-PNUM 1 1 P-
-PNUM 100 10 PT-
+PNUM:1,1,P-
+PNUM:100,10,PT-
 ```
 
 `PNUM` without arguments continues from the current session value.

@@ -45,12 +45,16 @@ impl Settings {
     }
 
     fn apply_command(&mut self, command: &str) -> Result<(), &'static str> {
-        let args: Vec<_> = command.split_whitespace().skip(1).collect();
+        let args: Vec<_> = command
+            .split_once(':')
+            .filter(|(name, _)| name.eq_ignore_ascii_case(COMMAND))
+            .map(|(_, tail)| tail.split(',').collect())
+            .unwrap_or_else(|| command.split_whitespace().skip(1).collect());
         if args.is_empty() {
             return Ok(());
         }
-        if args.len() > 3 {
-            return Err("Usage: PNUM [start] [increment] [prefix]");
+        if args.len() > 3 || args[0].is_empty() {
+            return Err("Usage: PNUM:start,increment,prefix (for example PNUM:1,1,P-)");
         }
         self.next = args[0].parse().map_err(|_| "Start must be an integer")?;
         if let Some(increment) = args.get(1) {
@@ -116,6 +120,9 @@ impl BuiltinPlugin for PointNumberingPlugin {
         if !command.eq_ignore_ascii_case(COMMAND)
             && !command
                 .to_ascii_uppercase()
+                .starts_with(&format!("{COMMAND}:"))
+            && !command
+                .to_ascii_uppercase()
                 .starts_with(&format!("{COMMAND} "))
         {
             return false;
@@ -127,7 +134,7 @@ impl BuiltinPlugin for PointNumberingPlugin {
             return true;
         }
         let message = format!(
-            "Point numbering: next {}, increment {}, prefix '{}'. Click a point; Enter or Esc finishes. Configure: PNUM [start] [increment] [prefix].",
+            "Point numbering: next {}, increment {}, prefix '{}'. Click a point; Enter or Esc finishes. Configure: PNUM:start,increment,prefix (for example PNUM:1,1,P-).",
             settings.next, settings.increment, settings.prefix
         );
         drop(settings);
@@ -176,7 +183,7 @@ mod tests {
     #[test]
     fn command_sets_numbering_values() {
         let mut settings = Settings::default();
-        settings.apply_command("PNUM 10 5 P-").unwrap();
+        settings.apply_command("PNUM:10,5,P-").unwrap();
         assert_eq!(settings.label(), "P-10");
         assert_eq!(settings.increment, 5);
     }

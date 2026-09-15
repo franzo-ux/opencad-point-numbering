@@ -50,19 +50,19 @@ La prima esecuzione parte da `1`, aumenta di `1` e non ha prefisso.
 Prima di selezionare i punti, digita:
 
 ```text
-PNUM [numero-iniziale] [incremento] [prefisso]
+PNUM:numero-iniziale,incremento,prefisso
 ```
 
 | Obiettivo | Comando | Risultato |
 | --- | --- | --- |
 | Continuare | `PNUM` | Mantiene il prossimo valore della sessione |
-| Ricominciare da 1 | `PNUM 1` | Riparte da 1 e conserva incremento/prefisso correnti |
-| Prefisso `P-` | `PNUM 1 1 P-` | `P-1`, `P-2`, `P-3`… |
-| Salti di 10 | `PNUM 100 10 PT-` | `PT-100`, `PT-110`, `PT-120`… |
-| Conto alla rovescia | `PNUM 10 -1 N-` | `N-10`, `N-9`, `N-8`… |
-| Rimuovere il prefisso | `PNUM 1 1 ""` | `1`, `2`, `3`… |
+| Ricominciare da 1 | `PNUM:1` | Riparte da 1 e conserva incremento/prefisso correnti |
+| Prefisso `P-` | `PNUM:1,1,P-` | `P-1`, `P-2`, `P-3`… |
+| Salti di 10 | `PNUM:100,10,PT-` | `PT-100`, `PT-110`, `PT-120`… |
+| Conto alla rovescia | `PNUM:10,-1,N-` | `N-10`, `N-9`, `N-8`… |
+| Rimuovere il prefisso | `PNUM:1,1,` | `1`, `2`, `3`… |
 
-Il prefisso non può contenere spazi.
+Non inserire spazi dopo `PNUM`: il comando parte immediatamente. Il prefisso non può contenere spazi.
 
 ## Aspetto delle etichette
 
@@ -78,4 +78,4 @@ Il prefisso non può contenere spazi.
 | La scheda **xfTools** non compare | Controlla che DLL e `plugin.toml` siano nella stessa cartella e riavvia OpenCADStudio. |
 | Il plugin non viene caricato | Verifica di usare OpenCADStudio `v2026.37`; il plugin dipende dalla sua API. |
 | Il testo è troppo piccolo/grande | La prima versione usa altezza fissa `2.5`; modifica la singola etichetta o richiedi una versione configurabile. |
-| Il numero non riparte | Avvia `PNUM` con il numero iniziale desiderato, ad esempio `PNUM 1 1 P-`. |
+| Il numero non riparte | Avvia `PNUM` con il numero iniziale desiderato, ad esempio `PNUM:1,1,P-`. |
