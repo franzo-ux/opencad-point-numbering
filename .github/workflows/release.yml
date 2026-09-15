@@ -1,0 +1,29 @@
+name: Windows release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - run: cargo test
+      - run: cargo build --release
+      - name: Stage release files
+        shell: bash
+        run: |
+          mkdir dist
+          cp target/release/opencad_point_numbering.dll \
+            dist/opencad.point_numbering-windows-x86_64.dll
+          cp plugin.toml dist/plugin.toml
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/opencad.point_numbering-windows-x86_64.dll
+            dist/plugin.toml

@@ -4,9 +4,21 @@
 
 An [OpenCADStudio](https://github.com/HakanSeven12/OpenCADStudio) plugin that places incrementing text labels by clicking points in the drawing.
 
-## Install from source
+## Install
 
 This plugin is built for OpenCADStudio `v2026.37` and Rust `1.98.1`.
+
+### Windows release
+
+Download `opencad.point_numbering-windows-x86_64.dll` and `plugin.toml` from the [latest release](https://github.com/franzo-ux/opencad-point-numbering/releases/latest), then copy both files to:
+
+```text
+%APPDATA%\OpenCADStudio\plugins\opencad.point_numbering\
+```
+
+Restart OpenCADStudio.
+
+### Linux source build
 
 ```sh
 cargo build --release
@@ -16,7 +28,7 @@ cp target/release/libopencad_point_numbering.so \
 cp plugin.toml ~/.config/OpenCADStudio/plugins/opencad.point_numbering/
 ```
 
-Restart OpenCADStudio after installation.
+Restart OpenCADStudio.
 
 ## Use
 
