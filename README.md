@@ -49,6 +49,10 @@ Click **Number points** in the **xfTools** ribbon tab, or run `PNUM`. On Windows
 
 The command accepts vertices and empty drawing locations. It creates a text label using the selected settings, then retains the next number until OpenCADStudio closes. Press Enter or Esc to finish.
 
+### Settings window
+
+The Windows and macOS form runs separately from OpenCADStudio, so it does not inherit the host theme automatically. It is intentionally compact and utility-focused. A future visual pass can align its palette, typography, spacing, and accent color with a chosen OpenCADStudio theme.
+
 ## Development
 
 ```sh
