@@ -215,14 +215,16 @@ function run(argv) {
   }
 
   const alert = $.NSAlert.alloc.init;
-  alert.setMessageText($('xfTools — Point numbering'));
-  alert.setInformativeText($('Configure the labels before selecting points.'));
-  alert.setAccessoryView(view);
-  alert.addButtonWithTitle($('Start'));
-  alert.addButtonWithTitle($('Cancel'));
-  if (alert.runModal() != $.NSAlertFirstButtonReturn) return;
+  alert.messageText = 'xfTools — Point numbering';
+  alert.informativeText = 'Configure the labels before selecting points.';
+  alert.accessoryView = view;
+  alert.addButtonWithTitle('Start');
+  alert.addButtonWithTitle('Cancel');
+  alert.layout();
+  alert.window.makeFirstResponder(inputs[0]);
+  if (alert.runModal() != $.NSAlertFirstButtonReturn) return null;
 
-  console.log(inputs.map(input => ObjC.unwrap(input.stringValue)).join('\t'));
+  return inputs.map(input => ObjC.unwrap(input.stringValue)).join('\t');
 }"#;
     let output = Command::new("osascript")
         .args(["-l", "JavaScript", "-e", script])
