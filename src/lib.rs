@@ -184,18 +184,48 @@ if ($form.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Outp
 #[cfg(target_os = "macos")]
 fn show_settings(settings: Settings) -> Result<Option<Settings>, String> {
     let values = settings.fields();
-    let script = r#"on run argv
-set a to text returned of (display dialog "Start number" default answer (item 1 of argv))
-set b to text returned of (display dialog "Increment" default answer (item 2 of argv))
-set c to text returned of (display dialog "Prefix" default answer (item 3 of argv))
-set d to text returned of (display dialog "Text height" default answer (item 4 of argv))
-set e to text returned of (display dialog "Upper-right offset" default answer (item 5 of argv))
-set f to text returned of (display dialog "Text style" default answer (item 6 of argv))
-return a & tab & b & tab & c & tab & d & tab & e & tab & f
-end run"#;
+    let script = r#"ObjC.import('Cocoa');
+
+function field(value, y) {
+  const input = $.NSTextField.alloc.initWithFrame($.NSMakeRect(160, y, 210, 24));
+  input.setStringValue($(value));
+  return input;
+}
+
+function label(text, y) {
+  const output = $.NSTextField.alloc.initWithFrame($.NSMakeRect(0, y, 150, 24));
+  output.setStringValue($(text));
+  output.setBezeled(false);
+  output.setDrawsBackground(false);
+  output.setEditable(false);
+  output.setSelectable(false);
+  return output;
+}
+
+function run(argv) {
+  const view = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, 370, 210));
+  const names = ['Start number', 'Increment', 'Prefix', 'Text height', 'Upper-right offset', 'Text style'];
+  const inputs = [];
+  for (let index = 0; index < names.length; index++) {
+    const y = 180 - index * 30;
+    const input = field(argv[index], y);
+    view.addSubview(label(names[index], y));
+    view.addSubview(input);
+    inputs.push(input);
+  }
+
+  const alert = $.NSAlert.alloc.init;
+  alert.setMessageText($('xfTools — Point numbering'));
+  alert.setInformativeText($('Configure the labels before selecting points.'));
+  alert.setAccessoryView(view);
+  alert.addButtonWithTitle($('Start'));
+  alert.addButtonWithTitle($('Cancel'));
+  if (alert.runModal() != $.NSAlertFirstButtonReturn) return;
+
+  console.log(inputs.map(input => ObjC.unwrap(input.stringValue)).join('\t'));
+}"#;
     let output = Command::new("osascript")
-        .arg("-e")
-        .arg(script)
+        .args(["-l", "JavaScript", "-e", script])
         .args(values)
         .output()
         .map_err(|error| format!("Could not open settings window: {error}"))?;
