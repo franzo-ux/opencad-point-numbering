@@ -45,6 +45,14 @@ Dopo il riavvio compare la scheda **xfTools** nel ribbon, con il pulsante **Numb
 
 La prima esecuzione parte da `1`, aumenta di `1` e non ha prefisso.
 
+## Punti di riferimento da PDF
+
+1. Allega prima il PDF con il comando nativo di OpenCADStudio.
+2. Seleziona **xfTools → PDF reference points** oppure digita `PDFREFS`.
+3. xfTools legge le linee vettoriali blu del PDF e crea punti CAD sui loro vertici.
+
+I punti creati sono riferimenti agganciabili con gli snap CAD e servono, ad esempio, per scalare il foglio in base alle tacche blu. Le parti rasterizzate del PDF non sono rilevabili.
+
 ## Configurare o riavviare la numerazione
 
 Ogni avvio di `PNUM` apre una finestra con questi campi:
@@ -68,6 +76,6 @@ Modifica i valori e scegli **Start**. Scegli **Cancel** per non avviare la numer
 | Problema | Cosa verificare |
 | --- | --- |
 | La scheda **xfTools** non compare | Controlla che DLL e `plugin.toml` siano nella stessa cartella e riavvia OpenCADStudio. |
-| Il plugin non viene caricato | Verifica di usare OpenCADStudio `v2026.37`; il plugin dipende dalla sua API. |
+| Il plugin non viene caricato | Verifica di usare OpenCADStudio `v2026.38`; il plugin dipende dalla sua API. |
 | Il testo è troppo piccolo/grande | Imposta l’altezza desiderata nella finestra prima di scegliere **Start**. |
 | Il numero non riparte | Imposta il numero iniziale desiderato nella finestra prima di scegliere **Start**. |

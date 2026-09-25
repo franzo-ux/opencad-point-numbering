@@ -45,6 +45,14 @@ After restarting, the **xfTools** ribbon tab includes a **Number points** button
 
 The first run starts at `1`, increments by `1`, and has no prefix.
 
+## PDF reference points
+
+1. Attach the PDF first with OpenCADStudio’s native command.
+2. Select **xfTools → PDF reference points**, or enter `PDFREFS` in the command line.
+3. xfTools reads blue vector lines in the PDF and creates CAD points at their vertices.
+
+The resulting points are snap references, useful for scaling the sheet from its blue registration marks. Raster-only PDF content cannot be detected.
+
 ## Configure or restart numbering
 
 Every `PNUM` launch opens a compact settings window with:
@@ -68,6 +76,6 @@ Change values and select **Start**. Select **Cancel** to leave the command inact
 | Problem | Check |
 | --- | --- |
 | The **xfTools** tab is missing | Ensure the DLL and `plugin.toml` are in the same folder, then restart OpenCADStudio. |
-| The plugin does not load | Confirm you are using OpenCADStudio `v2026.37`; the plugin depends on its API. |
+| The plugin does not load | Confirm you are using OpenCADStudio `v2026.38`; the plugin depends on its API. |
 | Labels are too large or small | Set the required height in the window before selecting **Start**. |
 | The number does not restart | Set the required start number in the window before selecting **Start**. |

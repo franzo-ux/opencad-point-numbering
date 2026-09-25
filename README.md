@@ -49,6 +49,10 @@ Click **Number points** in the **xfTools** ribbon tab, or run `PNUM`. On Windows
 
 The command accepts vertices and empty drawing locations. It creates a text label using the selected settings, then retains the next number until OpenCADStudio closes. Press Enter or Esc to finish.
 
+### PDF reference points
+
+After attaching a PDF underlay with OpenCADStudio, click **PDF reference points** or run `PDFREFS`. xfTools reads blue vector strokes in every attached PDF and creates CAD `POINT` entities at their vertices. Use them as native snap references; raster-only content cannot be detected.
+
 ### Settings window
 
 The Windows and macOS form runs separately from OpenCADStudio, so it does not inherit the host theme automatically. It is intentionally compact and utility-focused. A future visual pass can align its palette, typography, spacing, and accent color with a chosen OpenCADStudio theme.
