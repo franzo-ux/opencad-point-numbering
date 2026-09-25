@@ -65,6 +65,14 @@ The first run starts at `1`, increments by `1`, and has no prefix.
 
 The resulting points are snap references, useful for scaling the sheet from its blue registration marks. Raster-only PDF content cannot be detected.
 
+## Enclose existing text
+
+1. Select **xfTools → Enclose text**, or enter `TFRAME`.
+2. Choose a rectangle, circle, or slot; choose **Fit** to size the shape from the text plus offset, or **Fixed** to enter dimensions.
+3. Select `TEXT` entities to enclose; press **Enter** or **Esc** to finish.
+
+On Linux, use `TFRAME:rectangle,fit,1,10,5` (shape, mode, offset, width, height/diameter).
+
 ## Configure or restart numbering
 
 Every `PNUM` launch opens a compact settings window with:

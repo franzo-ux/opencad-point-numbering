@@ -65,6 +65,14 @@ La prima esecuzione parte da `1`, aumenta di `1` e non ha prefisso.
 
 I punti creati sono riferimenti agganciabili con gli snap CAD e servono, ad esempio, per scalare il foglio in base alle tacche blu. Le parti rasterizzate del PDF non sono rilevabili.
 
+## Racchiudere testi esistenti
+
+1. Seleziona **xfTools → Enclose text** oppure digita `TFRAME`.
+2. Scegli rettangolo, cerchio o slot; scegli **Fit** per adattare la forma al testo più l’offset, oppure **Fixed** per inserire dimensioni fisse.
+3. Seleziona i testi `TEXT` da racchiudere; premi **Invio** o **Esc** per terminare.
+
+Su Linux usa il formato `TFRAME:rectangle,fit,1,10,5` (forma, modalità, offset, larghezza, altezza/diametro).
+
 ## Configurare o riavviare la numerazione
 
 Ogni avvio di `PNUM` apre una finestra con questi campi:

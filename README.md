@@ -61,6 +61,10 @@ The command accepts vertices and empty drawing locations. It creates a text labe
 
 After attaching a PDF underlay with OpenCADStudio, click **PDF reference points** or run `PDFREFS`. xfTools reads blue vector strokes in every attached PDF and creates CAD `POINT` entities at their vertices. Use them as native snap references; raster-only content cannot be detected.
 
+### Enclose existing text
+
+Click **Enclose text** or run `TFRAME`, choose a rectangle, circle, or slot, then choose **Fit** (text bounds plus offset) or **Fixed** dimensions. Select existing `TEXT` entities one by one; press Enter or Esc to finish. On Linux, provide settings inline: `TFRAME:rectangle,fit,1,10,5`.
+
 ### Settings window
 
 The Windows and macOS form runs separately from OpenCADStudio, so it does not inherit the host theme automatically. It is intentionally compact and utility-focused. A future visual pass can align its palette, typography, spacing, and accent color with a chosen OpenCADStudio theme.

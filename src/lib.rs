@@ -1,13 +1,16 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 use std::process::Command;
 
 use ocs_plugin_api::host::{
     acadrust::{
-        entities::{Point, Text, UnderlayType},
+        entities::{Circle, LwPolyline, Point, Text, UnderlayType},
         objects::ObjectType,
-        types::Vector3,
+        types::{Handle, Vector2, Vector3},
         EntityType,
     },
     BuiltinPlugin, CommandStep, HostApi, InteractiveCommand,
@@ -17,6 +20,7 @@ use ocs_plugin_api::ribbon::{CadModule, IconKind, ModuleEvent, RibbonGroup, Ribb
 
 const COMMAND: &str = "PNUM";
 const PDF_REFS_COMMAND: &str = "PDFREFS";
+const TEXT_FRAME_COMMAND: &str = "TFRAME";
 
 #[derive(Clone, Copy)]
 struct Matrix {
@@ -234,7 +238,7 @@ static MANIFEST: PluginManifest = PluginManifest {
     api_version: ApiVersion::CURRENT,
     ribbon_order: 60,
     xdata_apps: &[],
-    command_prefixes: &[COMMAND, PDF_REFS_COMMAND],
+    command_prefixes: &[COMMAND, PDF_REFS_COMMAND, TEXT_FRAME_COMMAND],
 };
 
 #[derive(Debug, Clone)]
@@ -470,6 +474,300 @@ fn show_settings(_settings: Settings) -> Result<Option<Settings>, String> {
     Err("This platform has no settings window.".to_string())
 }
 
+#[derive(Clone, Copy)]
+enum FrameShape {
+    Rectangle,
+    Circle,
+    Slot,
+}
+
+#[derive(Clone, Copy)]
+enum FrameSize {
+    Fit,
+    Fixed,
+}
+
+#[derive(Clone, Copy)]
+struct FrameSettings {
+    shape: FrameShape,
+    size: FrameSize,
+    offset: f64,
+    width: f64,
+    height: f64,
+}
+
+impl Default for FrameSettings {
+    fn default() -> Self {
+        Self {
+            shape: FrameShape::Rectangle,
+            size: FrameSize::Fit,
+            offset: 1.0,
+            width: 10.0,
+            height: 5.0,
+        }
+    }
+}
+
+impl FrameSettings {
+    fn from_command(command: &str) -> Result<Self, String> {
+        let Some((_, values)) = command.split_once(':') else {
+            return Ok(Self::default());
+        };
+        let fields: Vec<String> = values.split(',').map(str::to_owned).collect();
+        Self::from_fields(&fields)
+    }
+
+    fn from_fields(fields: &[String]) -> Result<Self, String> {
+        if fields.len() != 5 {
+            return Err("The frame settings are incomplete.".to_string());
+        }
+        let shape = match fields[0].trim().to_ascii_lowercase().as_str() {
+            "rectangle" | "rect" => FrameShape::Rectangle,
+            "circle" => FrameShape::Circle,
+            "slot" => FrameShape::Slot,
+            _ => return Err("Shape must be Rectangle, Circle, or Slot.".to_string()),
+        };
+        let size = match fields[1].trim().to_ascii_lowercase().as_str() {
+            "fit" | "variable" => FrameSize::Fit,
+            "fixed" => FrameSize::Fixed,
+            _ => return Err("Size mode must be Fit or Fixed.".to_string()),
+        };
+        let parse = |value: &String, name: &str| {
+            value
+                .trim()
+                .replace(',', ".")
+                .parse::<f64>()
+                .map_err(|_| format!("{name} must be a number."))
+        };
+        let offset = parse(&fields[2], "Offset")?;
+        let width = parse(&fields[3], "Width")?;
+        let height = parse(&fields[4], "Height")?;
+        if !offset.is_finite()
+            || offset < 0.0
+            || !width.is_finite()
+            || width <= 0.0
+            || !height.is_finite()
+            || height <= 0.0
+        {
+            return Err(
+                "Offset must be non-negative; width and height must be positive.".to_string(),
+            );
+        }
+        Ok(Self {
+            shape,
+            size,
+            offset,
+            width,
+            height,
+        })
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn show_frame_settings(settings: FrameSettings) -> Result<Option<FrameSettings>, String> {
+    let script = r#"
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+$form = New-Object System.Windows.Forms.Form; $form.Text='xfTools - Enclose text'; $form.ClientSize=New-Object System.Drawing.Size(400,260); $form.StartPosition='CenterScreen'; $form.FormBorderStyle='FixedDialog'; $form.MaximizeBox=$false
+function Label($text,$y) { $l=New-Object System.Windows.Forms.Label; $l.Text=$text; $l.Location=New-Object System.Drawing.Point(16,$y); $l.Size=New-Object System.Drawing.Size(150,22); $form.Controls.Add($l) }
+function TextField($value,$y) { $t=New-Object System.Windows.Forms.TextBox; $t.Text=$value; $t.Location=New-Object System.Drawing.Point(175,$y); $t.Size=New-Object System.Drawing.Size(200,22); $form.Controls.Add($t); return $t }
+Label 'Shape' 18; $shape=New-Object System.Windows.Forms.ComboBox; $shape.DropDownStyle='DropDownList'; $shape.Items.AddRange([string[]]@('Rectangle','Circle','Slot')); $shape.SelectedItem=$env:XFTOOLS_FRAME_SHAPE; $shape.Location=New-Object System.Drawing.Point(175,16); $shape.Size=New-Object System.Drawing.Size(200,22); $form.Controls.Add($shape)
+Label 'Size mode' 52; $mode=New-Object System.Windows.Forms.ComboBox; $mode.DropDownStyle='DropDownList'; $mode.Items.AddRange([string[]]@('Fit','Fixed')); $mode.SelectedItem=$env:XFTOOLS_FRAME_MODE; $mode.Location=New-Object System.Drawing.Point(175,50); $mode.Size=New-Object System.Drawing.Size(200,22); $form.Controls.Add($mode)
+Label 'Offset from text' 86; $offset=TextField $env:XFTOOLS_FRAME_OFFSET 84
+Label 'Fixed width' 120; $width=TextField $env:XFTOOLS_FRAME_WIDTH 118
+Label 'Fixed height / diameter' 154; $height=TextField $env:XFTOOLS_FRAME_HEIGHT 152
+$cancel=New-Object System.Windows.Forms.Button; $cancel.Text='Cancel'; $cancel.Location=New-Object System.Drawing.Point(215,205); $cancel.DialogResult=[System.Windows.Forms.DialogResult]::Cancel
+$ok=New-Object System.Windows.Forms.Button; $ok.Text='Apply'; $ok.Location=New-Object System.Drawing.Point(300,205); $ok.DialogResult=[System.Windows.Forms.DialogResult]::OK
+$form.AcceptButton=$ok; $form.CancelButton=$cancel; $form.Controls.AddRange(@($cancel,$ok))
+if ($form.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output ($shape.Text+"`t"+$mode.Text+"`t"+$offset.Text+"`t"+$width.Text+"`t"+$height.Text) }
+"#;
+    let shape = match settings.shape {
+        FrameShape::Rectangle => "Rectangle",
+        FrameShape::Circle => "Circle",
+        FrameShape::Slot => "Slot",
+    };
+    let mode = match settings.size {
+        FrameSize::Fit => "Fit",
+        FrameSize::Fixed => "Fixed",
+    };
+    let output = Command::new("powershell")
+        .args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            script,
+        ])
+        .env("XFTOOLS_FRAME_SHAPE", shape)
+        .env("XFTOOLS_FRAME_MODE", mode)
+        .env("XFTOOLS_FRAME_OFFSET", settings.offset.to_string())
+        .env("XFTOOLS_FRAME_WIDTH", settings.width.to_string())
+        .env("XFTOOLS_FRAME_HEIGHT", settings.height.to_string())
+        .output()
+        .map_err(|error| format!("Could not open frame settings: {error}"))?;
+    if !output.status.success() {
+        return Ok(None);
+    }
+    let fields: Vec<String> = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .split('\t')
+        .map(str::to_owned)
+        .collect();
+    if fields.len() != 5 {
+        return Ok(None);
+    }
+    FrameSettings::from_fields(&fields).map(Some)
+}
+
+#[cfg(target_os = "macos")]
+fn show_frame_settings(settings: FrameSettings) -> Result<Option<FrameSettings>, String> {
+    let values = [
+        match settings.shape {
+            FrameShape::Rectangle => "Rectangle",
+            FrameShape::Circle => "Circle",
+            FrameShape::Slot => "Slot",
+        }
+        .to_string(),
+        match settings.size {
+            FrameSize::Fit => "Fit",
+            FrameSize::Fixed => "Fixed",
+        }
+        .to_string(),
+        settings.offset.to_string(),
+        settings.width.to_string(),
+        settings.height.to_string(),
+    ];
+    let script = r#"ObjC.import('Cocoa');
+function field(value, y) { const input = $.NSTextField.alloc.initWithFrame($.NSMakeRect(175, y, 200, 24)); input.setStringValue($(value)); return input; }
+function label(text, y) { const output = $.NSTextField.alloc.initWithFrame($.NSMakeRect(0, y, 165, 24)); output.setStringValue($(text)); output.setBezeled(false); output.setDrawsBackground(false); output.setEditable(false); return output; }
+const view = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, 375, 180)); const names = ['Shape (Rectangle/Circle/Slot)', 'Size mode (Fit/Fixed)', 'Offset from text', 'Fixed width / diameter', 'Fixed height']; const inputs = [];
+for (let i = 0; i < names.length; i++) { const y = 150 - i * 30; const input = field(arguments[i], y); view.addSubview(label(names[i], y)); view.addSubview(input); inputs.push(input); }
+const alert = $.NSAlert.alloc.init; alert.messageText = 'xfTools — Enclose text'; alert.informativeText = 'Configure the frame before selecting TEXT entities.'; alert.accessoryView = view; alert.addButtonWithTitle('Apply'); alert.addButtonWithTitle('Cancel'); alert.layout();
+if (alert.runModal() == $.NSAlertFirstButtonReturn) console.log(inputs.map(input => ObjC.unwrap(input.stringValue)).join('\t'));"#;
+    let output = Command::new("osascript")
+        .args(["-l", "JavaScript", "-e", script])
+        .args(values)
+        .output()
+        .map_err(|error| format!("Could not open frame settings: {error}"))?;
+    if !output.status.success() {
+        return Ok(None);
+    }
+    let fields: Vec<String> = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .split('\t')
+        .map(str::to_owned)
+        .collect();
+    if fields.len() != 5 {
+        return Ok(None);
+    }
+    FrameSettings::from_fields(&fields).map(Some)
+}
+
+#[cfg(target_os = "linux")]
+fn show_frame_settings(settings: FrameSettings) -> Result<Option<FrameSettings>, String> {
+    // Linux users pass TFRAME:shape,mode,offset,width,height; avoid a GUI dependency.
+    Ok(Some(settings))
+}
+
+#[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+fn show_frame_settings(_settings: FrameSettings) -> Result<Option<FrameSettings>, String> {
+    Err("This platform has no frame settings window.".to_string())
+}
+
+fn rotate(text: &Text, point: [f64; 2]) -> Vector2 {
+    let (cos, sin) = (text.rotation.cos(), text.rotation.sin());
+    Vector2::new(
+        text.insertion_point.x + cos * point[0] - sin * point[1],
+        text.insertion_point.y + sin * point[0] + cos * point[1],
+    )
+}
+
+fn text_frame(text: &Text, settings: FrameSettings) -> EntityType {
+    let text_width = text.value.chars().count() as f64 * text.height * 0.6 * text.width_factor;
+    let (width, height) = match settings.size {
+        FrameSize::Fit => (
+            text_width + 2.0 * settings.offset,
+            text.height + 2.0 * settings.offset,
+        ),
+        FrameSize::Fixed => (settings.width, settings.height),
+    };
+    let center = [text_width / 2.0, text.height / 2.0];
+    match settings.shape {
+        FrameShape::Circle => EntityType::Circle(Circle::from_center_radius(
+            Vector3::new(
+                rotate(text, center).x,
+                rotate(text, center).y,
+                text.insertion_point.z,
+            ),
+            width.max(height) / 2.0,
+        )),
+        FrameShape::Rectangle => {
+            let mut frame = LwPolyline::from_points(vec![
+                rotate(text, [center[0] - width / 2.0, center[1] - height / 2.0]),
+                rotate(text, [center[0] + width / 2.0, center[1] - height / 2.0]),
+                rotate(text, [center[0] + width / 2.0, center[1] + height / 2.0]),
+                rotate(text, [center[0] - width / 2.0, center[1] + height / 2.0]),
+            ]);
+            frame.elevation = text.insertion_point.z;
+            frame.close();
+            EntityType::LwPolyline(frame)
+        }
+        FrameShape::Slot => {
+            let (width, height) = if width >= height {
+                (width, height)
+            } else {
+                (height, width)
+            };
+            let mut frame = LwPolyline::new();
+            let left = center[0] - width / 2.0 + height / 2.0;
+            let right = center[0] + width / 2.0 - height / 2.0;
+            let bottom = center[1] - height / 2.0;
+            let top = center[1] + height / 2.0;
+            frame.add_point(rotate(text, [left, bottom]));
+            frame.add_point_with_bulge(rotate(text, [right, bottom]), 1.0);
+            frame.add_point(rotate(text, [right, top]));
+            frame.add_point_with_bulge(rotate(text, [left, top]), 1.0);
+            frame.elevation = text.insertion_point.z;
+            frame.close();
+            EntityType::LwPolyline(frame)
+        }
+    }
+}
+
+struct TextFrameCommand {
+    settings: Arc<Mutex<Option<FrameSettings>>>,
+    texts: HashMap<Handle, Text>,
+}
+
+impl InteractiveCommand for TextFrameCommand {
+    fn on_point(&mut self, _point: [f64; 3]) -> CommandStep {
+        CommandStep::NeedPoint
+    }
+
+    fn prompt(&self) -> String {
+        match *self.settings.lock().expect("frame settings lock poisoned") {
+            Some(_) => "Select TEXT to enclose (Enter or Esc to finish):".to_string(),
+            None => "Configure options in the xfTools window...".to_string(),
+        }
+    }
+    fn needs_object_pick(&self) -> bool {
+        true
+    }
+    fn on_object_pick(&mut self, handle: Handle, _point: [f64; 3]) -> CommandStep {
+        let Some(settings) = *self.settings.lock().expect("frame settings lock poisoned") else {
+            return CommandStep::NeedPoint;
+        };
+        match self.texts.get(&handle) {
+            Some(text) => CommandStep::Commit(text_frame(text, settings)),
+            None => CommandStep::NeedPoint,
+        }
+    }
+    fn on_enter(&mut self) -> CommandStep {
+        CommandStep::Done
+    }
+}
+
 struct PointNumberingModule;
 impl CadModule for PointNumberingModule {
     fn id(&self) -> &'static str {
@@ -496,6 +794,12 @@ impl CadModule for PointNumberingModule {
                         icon: IconKind::Glyph("⌖"),
                         event: ModuleEvent::Command(PDF_REFS_COMMAND.to_string()),
                     }),
+                    RibbonItem::LargeTool(ToolDef {
+                        id: TEXT_FRAME_COMMAND,
+                        label: "Enclose text",
+                        icon: IconKind::Glyph("▭"),
+                        event: ModuleEvent::Command(TEXT_FRAME_COMMAND.to_string()),
+                    }),
                 ],
             }]
         })
@@ -521,6 +825,37 @@ impl BuiltinPlugin for PointNumberingPlugin {
         Box::new(PointNumberingModule)
     }
     fn dispatch(&self, host: &mut dyn HostApi, command: &str) -> bool {
+        if command.eq_ignore_ascii_case(TEXT_FRAME_COMMAND)
+            || command
+                .to_ascii_uppercase()
+                .starts_with(&format!("{TEXT_FRAME_COMMAND}:"))
+        {
+            let initial = match FrameSettings::from_command(command) {
+                Ok(settings) => settings,
+                Err(error) => {
+                    host.push_error(&format!("TFRAME: {error}"));
+                    return true;
+                }
+            };
+            let texts = host
+                .document()
+                .entities()
+                .filter_map(|entity| match entity {
+                    EntityType::Text(text) => Some((text.common.handle, text.clone())),
+                    _ => None,
+                })
+                .collect();
+            let settings = Arc::new(Mutex::new(None));
+            let configuration = Arc::clone(&settings);
+            std::thread::spawn(move || {
+                if let Ok(Some(selected)) = show_frame_settings(initial) {
+                    *configuration.lock().expect("frame settings lock poisoned") = Some(selected);
+                }
+            });
+            host.push_info("Set the enclosure options in the xfTools window.");
+            host.start_interactive(Box::new(TextFrameCommand { settings, texts }));
+            return true;
+        }
         if command.eq_ignore_ascii_case(PDF_REFS_COMMAND) {
             match add_pdf_reference_points(host) {
                 Ok(count) => host.push_output(&format!(
@@ -625,7 +960,10 @@ ocs_plugin_api::export_plugin!(PointNumberingPlugin::new());
 
 #[cfg(test)]
 mod tests {
-    use super::{blue_vector_points, Settings};
+    use super::{
+        blue_vector_points, text_frame, EntityType, FrameSettings, FrameShape, FrameSize, Settings,
+        Text, Vector3,
+    };
     use lopdf::{
         content::{Content, Operation},
         dictionary, Document, Object, Stream,
@@ -651,6 +989,35 @@ mod tests {
         .unwrap();
         assert_eq!(settings.text_height, 3.5);
         assert_eq!(settings.style, "Notes");
+    }
+
+    #[test]
+    fn text_frame_uses_selected_shape_and_size() {
+        let text = Text::with_value("AB", Vector3::new(10.0, 20.0, 0.0)).with_height(2.0);
+        let fixed = FrameSettings {
+            shape: FrameShape::Circle,
+            size: FrameSize::Fixed,
+            offset: 0.0,
+            width: 8.0,
+            height: 4.0,
+        };
+        let EntityType::Circle(circle) = text_frame(&text, fixed) else {
+            panic!("expected circle")
+        };
+        assert_eq!(circle.center, Vector3::new(11.2, 21.0, 0.0));
+        assert_eq!(circle.radius, 4.0);
+        let slot = FrameSettings {
+            shape: FrameShape::Slot,
+            size: FrameSize::Fit,
+            offset: 1.0,
+            width: 1.0,
+            height: 1.0,
+        };
+        let EntityType::LwPolyline(slot) = text_frame(&text, slot) else {
+            panic!("expected slot")
+        };
+        assert!(slot.is_closed);
+        assert_eq!(slot.vertices.len(), 4);
     }
 
     #[test]
