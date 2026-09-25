@@ -20,6 +20,9 @@ jobs:
           - os: macos-14
             library: libopencad_point_numbering.dylib
             asset: opencad.point_numbering-macos-aarch64.dylib
+          - os: ubuntu-latest
+            library: libopencad_point_numbering.so
+            asset: opencad.point_numbering-linux-x86_64.so
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

@@ -36,6 +36,18 @@ Dopo il riavvio compare la scheda **xfTools** nel ribbon, con il pulsante **Numb
 
 4. Riavvia OpenCADStudio.
 
+## Installazione su Linux (x86_64)
+
+1. Apri la [release più recente](https://github.com/franzo-ux/opencad-point-numbering/releases/latest).
+2. Scarica `opencad.point_numbering-linux-x86_64.so` e `plugin.toml`.
+3. Copia entrambi in:
+
+   ```text
+   ~/.config/OpenCADStudio/plugins/opencad.point_numbering/
+   ```
+
+4. Riavvia OpenCADStudio.
+
 ## Numerazione standard
 
 1. Apri un disegno.
